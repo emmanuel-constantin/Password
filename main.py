@@ -81,7 +81,7 @@ def save_password():
             addtojson(user,hash_password(password))
             message_label.config(text = "Mot de passe valide, il a été crypté et enregistré.")
     else:
-        message_label.config(text="Mot de passe invalide, veuillez réessayer.")
+        message_label.config(text="Votre mot de passe ne remplit pas les critères de sécurité, veuillez réessayer.")
 
 def show_passwords():
     with open('passwords.json', 'r') as f: 
