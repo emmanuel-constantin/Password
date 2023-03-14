@@ -85,7 +85,6 @@ def menu():
                 user = input("Entrez votre nom : ")
                 if user_exists(user):
                     print("Ce nom existe déjà.")
-                    # break
                 else: 
                     user_valide = True
             mot_de_passe_valide = False
