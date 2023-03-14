@@ -4,6 +4,7 @@ import string
 import hashlib
 import json
 import os.path
+from tkinter import *
 
 
 def contientmaj(password):
@@ -46,10 +47,7 @@ def addtojson(user, password):
         with open('passwords.json', 'w') as file_json:
             json.dump({"infos": [{"user": user, "password" : password}]}, file_json)
     
-def show_passwords():
-    with open('passwords.json', 'r') as f: 
-        passwords = json.loads(f.read())
-    print(passwords)
+
 
 def password_exists(password):
     if os.path.isfile('passwords.json'):
@@ -73,36 +71,52 @@ def user_exists(user):
     else:
         return False
         
-def menu():
-    while True: 
-        print("1. Ajouter un mot de passe")
-        print("2. Afficher les mots de passe")
-        print("3. Quitter")
-        choice = input("Que voulez vous faire ? (1-3) : ")
-        user_valide = False
-        if choice == '1':
-            while not user_valide:
-                user = input("Entrez votre nom : ")
-                if user_exists(user):
-                    print("Ce nom existe déjà.")
-                else: 
-                    user_valide = True
-            mot_de_passe_valide = False
-            while not mot_de_passe_valide:
-                password = input("Choisissez un mot de passe, il doit contenir au minimum une lettre minuscule, une lettre majuscule, un caractère spécial et doit avoir une longueur de 8 caractères minimum : ")
-                if len(password)>= 8 and contientmaj(password) and contientminusc(password) and contientchiffre(password) and contientcaractspe(password):
-                    if password_exists(password):
-                        print("Ce mot de passe existe déjà. ")
-                    else: 
-                        addtojson(user,hash_password(password))
-                        print("Mot de passe valide, il a été crypté et enregistré.")
-                        mot_de_passe_valide = True
-                else:
-                    print ("Mot de passe invalide, veuilez réessayer ")
-        elif choice == '2':
-            show_passwords()
-        elif choice == '3':
-            break
+def save_password():
+    user = user_entry.get()
+    password = password_entry.get()
+    if len(password) >= 8 and contientmaj(password) and contientminusc(password) and contientchiffre(password) and contientcaractspe(password):
+        if password_exists(password):
+            message_label.config(text = "Ce mot de passe existe déjà.")
+        else: 
+            addtojson(user,hash_password(password))
+            message_label.config(text = "Mot de passe valide, il a été crypté et enregistré.")
+    else:
+        message_label.config(text="Mot de passe invalide, veuillez réessayer.")
 
-menu()
+def show_passwords():
+    with open('passwords.json', 'r') as f: 
+        passwords = json.loads(f.read())
+    message_label.config(text = str(passwords))
+
+root = Tk()
+root.title("Gestionnaire de mots de passe")
+
+user_label = Label(root, text ="Nom d'utilisateur")
+user_label.pack()
+
+user_entry = Entry(root)
+user_entry.pack()
+
+password_label = Label(root, text="Mot de passe")
+password_label.pack()
+
+password_entry = Entry(root, show="*")
+password_entry.pack()
+
+save_button = Button(root, text="Enregistrer", command=save_password)
+save_button.pack()
+
+show_button = Button(root, text="Afficher les mots de passe", command=show_passwords)
+show_button.pack()
+
+message_label = Label(root, text="")
+message_label.pack()
+
+root.mainloop()
+
+
+
+
+
+
 
