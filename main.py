@@ -34,44 +34,70 @@ def hash_password(password):
     chainehachee = hasher.hexdigest()
     return chainehachee
 
-def add_on_json(user, password):
+def addtojson(user, password):
     if os.path.isfile("passwords.json"):
         with open('passwords.json', 'r+') as file_json:
             dict_json = json.load(file_json)
-            dict_json[user] = password
-            file_json.truncate(0)
+            dict_json.setdefault("infos", []).append({"user": user, "password": password})
             file_json.seek(0)
+            file_json.truncate(0)
             json.dump((dict_json), file_json)
     else:
         with open('passwords.json', 'w') as file_json:
-            json.dump({user: password}, file_json)
-
-
-
-# def addpassword(password):
-#     open_file = open('passwords.json','a')
-#     json.dump(password, open_file)
-#     open_file.close()
+            json.dump({"infos": [{"user": user, "password" : password}]}, file_json)
     
 def show_passwords():
     with open('passwords.json', 'r') as f: 
-        passwords = json.load(f)
+        passwords = json.loads(f.read())
     print(passwords)
 
+def password_exists(password):
+    if os.path.isfile('passwords.json'):
+        with open('passwords.json', 'r+') as f:
+            file_contents = f.read()
+        data = json.loads(file_contents)
+        for entry in data.get('infos', []):
+            if entry.get('password') == hash_password(password):
+                return True 
+    else:
+        return False
+
+def user_exists(user):
+    if os.path.isfile('passwords.json'):
+        with open('passwords.json', 'r+') as f:
+            file_contents = f.read()
+        data = json.loads(file_contents)
+        for entry in data.get('infos', []):
+            if entry.get('user') == user:
+                return True 
+    else:
+        return False
+        
 def menu():
     while True: 
         print("1. Ajouter un mot de passe")
         print("2. Afficher les mots de passe")
         print("3. Quitter")
         choice = input("Que voulez vous faire ? (1-3) : ")
+        user_valide = False
         if choice == '1':
-            user = input("Entrez votre nom : ")
-            while True:
+            while not user_valide:
+                user = input("Entrez votre nom : ")
+                if user_exists(user):
+                    print("Ce nom existe déjà.")
+                    # break
+                else: 
+                    user_valide = True
+            mot_de_passe_valide = False
+            while not mot_de_passe_valide:
                 password = input("Choisissez un mot de passe, il doit contenir au minimum une lettre minuscule, une lettre majuscule, un caractère spécial et doit avoir une longueur de 8 caractères minimum : ")
                 if len(password)>= 8 and contientmaj(password) and contientminusc(password) and contientchiffre(password) and contientcaractspe(password):
-                    add_on_json(user,hash_password(password))
-                    print("Mot de passe valide, voici votre mot de passe crypté, qui a été ajouté à votre liste de mots de passe  :", hash_password(password))
-                    break 
+                    if password_exists(password):
+                        print("Ce mot de passe existe déjà. ")
+                    else: 
+                        addtojson(user,hash_password(password))
+                        print("Mot de passe valide, il a été crypté et enregistré.")
+                        mot_de_passe_valide = True
                 else:
                     print ("Mot de passe invalide, veuilez réessayer ")
         elif choice == '2':
